@@ -51,17 +51,17 @@ def get_genre(path_to_tune):
 
 def get_feature_names():
     # First we create the column names of the data frame
-    colnames = ['genre', 'ZCR mean', 'ZCR std', 'RMS mean', 'RMS std', 'SC mean', 'SC std']
+    colnames = ['genre', 'ZCR', 'RMS', 'SC']
     #colnames = ['genre', 'ZCR mean', 'RMS mean', 'SC mean']
 
     for i in range(NUM_CEPS):
-        colnames.append('MFCC' + str(i) + ' mean')
+        colnames.append('MFCC' + str(i))
+    # for i in range(NUM_CEPS):
+    #     colnames.append('MFCC' + str(i) + ' std')
     for i in range(NUM_CEPS):
-        colnames.append('MFCC' + str(i) + ' std')
-    for i in range(NUM_CEPS):
-        colnames.append('MFCCD' + str(i) + ' mean')
-    for i in range(NUM_CEPS):
-        colnames.append('MFCCD' + str(i) + ' std')
+        colnames.append('MFCCD' + str(i))
+    # for i in range(NUM_CEPS):
+    #     colnames.append('MFCCD' + str(i) + ' std')
 
     return colnames
 
@@ -85,31 +85,31 @@ def populate_df(main_directory, duration = 60):
 
                 print "extracting zc"
                 zc = librosa.feature.zero_crossing_rate(data)
-                feats.append(np.mean(zc[0]))
-                feats.append(np.std(zc[0]))
+                feats.append(zc[0])
+                # feats.append(np.std(zc[0]))
 
                 print "extracting rms"
                 rms = librosa.feature.rmse(data)
-                feats.append(np.mean(rms[0]))
-                feats.append(np.std(rms[0]))
+                feats.append(rms[0])
+                # feats.append(np.std(rms[0]))
 
                 print "extracting sc"
                 sc = librosa.feature.spectral_centroid(data, sr=SAMP_RATE)
-                feats.append(np.mean(sc[0]))
-                feats.append(np.std(sc[0]))
+                feats.append(sc[0])
+                # feats.append(np.std(sc[0]))
 
                 print "extracting MFCCs \n"
                 mfcc = librosa.feature.mfcc(data, sr=SAMP_RATE, n_mfcc=NUM_CEPS, n_fft=FFT_WIN, hop_length=HOP)
                 delta_mfcc = librosa.feature.delta(mfcc)
 
                 for i in range(NUM_CEPS):
-                    feats.append(np.mean(mfcc[i]))
+                    feats.append(mfcc[i])
+                # for i in range(NUM_CEPS):
+                #     feats.append(np.std(mfcc[i]))
                 for i in range(NUM_CEPS):
-                    feats.append(np.std(mfcc[i]))
-                for i in range(NUM_CEPS):
-                    feats.append(np.mean(delta_mfcc[i]))
-                for i in range(NUM_CEPS):
-                    feats.append(np.std(delta_mfcc[i]))
+                    feats.append(delta_mfcc[i])
+                # for i in range(NUM_CEPS):
+                #     feats.append(np.std(delta_mfcc[i]))
 
                 df.loc[len(df)] = feats
 

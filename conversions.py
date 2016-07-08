@@ -65,5 +65,5 @@ def mass_convert(main_dir, solution="ffmpeg", rate="44100"):
 # ##############################################################################
 # # Mass convert a directory and its contents
 #
-# mass_convert('/Users/tomas/Music/Genres')
+# mass_convert('/Users/tomas/Music/Bayes test')
 
