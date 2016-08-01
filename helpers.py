@@ -8,6 +8,7 @@ import librosa
 import sklearn
 
 # CONSTANTS USED
+# The directories should be modified to follow your own organization
 MAIN_DIR = '/Users/tomas/Music/Test'
 PROJ_DIR = '/Users/tomas/Documents/MOOCS/udacity/mlnd/p5'
 FFT_WIN = 1024

@@ -14,6 +14,7 @@ from sklearn.cross_validation import train_test_split, cross_val_score
 from sklearn.decomposition import PCA
 import seaborn as sns
 
+# The following directories should be modified to follow your own organization
 MAIN_DIR = '/Users/tomas/Documents/MOOCS/udacity/mlnd/p5'
 GENRES_DIR = '/Users/tomas/Music/Genres'
 BAYES_DIR = '/Users/tomas/Music/Bayes test'
@@ -272,13 +273,13 @@ y_all = mod_data[labels]
 # print pd.DataFrame(np.round(classifier.predict_proba(samples),3), columns=GENRES_LIST, index=new_songs)
 
 
-# # K-NN
-#
+# K-NN
+
 # # STANDARDIZING DATA
 # scaler = StandardScaler()
 # X_all_s = scaler.fit_transform(X_all)
 # X_all_s = pd.DataFrame(X_all_s, columns=X_all.columns)
-#
+
 # # STRATIFIED SPLIT INTO TRAINING AND TESTING SETS
 # sss = StratifiedShuffleSplit(y_all, n_iter=7, test_size=0.25, random_state=4)
 # precisions = []
@@ -298,7 +299,7 @@ y_all = mod_data[labels]
 #     recalls.append(recall_score(y_test, y_preds, average=None))
 #     f1s.append(f1_score(y_test, y_preds, average=None))
 #     accuracies.append(accuracy_score(y_test, y_preds))
-#
+
 # # GET SCORES
 # print np.round(np.mean(precisions, axis=0),2)
 # print np.round(np.mean(recalls, axis=0),2)
@@ -306,7 +307,6 @@ y_all = mod_data[labels]
 # print np.round(np.mean([np.mean(precisions, axis=0),np.mean(recalls, axis=0),np.mean(f1s, axis=0)], axis=1),3)
 # print np.round(np.mean(accuracies),3)
 
-#
 # # PLOT CONFUSION MATRIX FOR LATEST FOLD
 # conf_matrix = confusion_matrix(y_test, y_preds)
 # df_cm = pd.DataFrame(conf_matrix, index=GENRES_LIST,columns=GENRES_LIST)
@@ -314,30 +314,51 @@ y_all = mod_data[labels]
 # sns.heatmap(df_cm, annot=True)
 # plt.savefig('naiveKNN.png')
 
-# # IMPROVING THE KNN MODEL
-#
-# parameters = {'n_neighbors':np.arange(1,25,1),
-#               'weights':['uniform','distance'],
-#               'p':[1,2]}
-#
-# # STANDARDIZING DATA
-# scaler = StandardScaler()
-# X_all_s = scaler.fit_transform(X_all)
-# X_all_s = pd.DataFrame(X_all_s, columns=X_all.columns)
-#
-# sss = StratifiedShuffleSplit(y_all, n_iter=1, test_size=0.25, random_state=4)
+# IMPROVING THE KNN MODEL
+
+parameters = {'n_neighbors':np.arange(1,25,1),
+              'weights':['uniform','distance'],
+              'p':[1,2]}
+
+# STANDARDIZING DATA
+scaler = StandardScaler()
+X_all_s = scaler.fit_transform(X_all)
+X_all_s = pd.DataFrame(X_all_s, columns=X_all.columns)
+
+# sss = StratifiedShuffleSplit(y_all, n_iter=5, test_size=0.25, random_state=14)
 # for train_index, test_index in sss:
 #     X_train_s, X_test_s = X_all_s.iloc[train_index], X_all_s.iloc[test_index]
 #     y_train, y_test = y_all[train_index], y_all[test_index]
 #
-# gs_classifier = GridSearchCV(KNeighborsClassifier(), parameters, cv=7, scoring='f1_weighted')
-# gs_classifier.fit(X_train_s,y_train)
+#     gs_classifier = GridSearchCV(KNeighborsClassifier(), parameters, cv=7, scoring='f1_weighted')
+#     gs_classifier.fit(X_train_s,y_train)
 #
-# print gs_classifier.best_params_
+#     print gs_classifier.best_params_
 #
-# y_preds = gs_classifier.predict(X_test_s)
+#     y_preds = gs_classifier.predict(X_test_s)
 #
-# print classification_report(y_test, y_preds, target_names=GENRES_LIST)
+#     print classification_report(y_test, y_preds, target_names=GENRES_LIST)
+
+# STRATIFIED SPLIT INTO TRAINING AND TESTING SETS
+sss = StratifiedShuffleSplit(y_all, n_iter=7, test_size=0.25, random_state=4)
+precisions = []
+recalls = []
+f1s = []
+accuracies = []
+for train_index, test_index in sss:
+    X_train, X_test = X_all_s.iloc[train_index], X_all_s.iloc[test_index]
+    y_train, y_test = y_all[train_index], y_all[test_index]
+
+    classifier = KNeighborsClassifier(n_neighbors=3, weights='distance')
+    classifier.fit(X_train, y_train)
+
+    y_preds = classifier.predict(X_test)
+
+    f1s.append(f1_score(y_test, y_preds, average=None))
+
+print np.mean(f1s, axis=1)
+print np.mean(np.mean(f1s, axis=1))
+print np.std(np.mean(f1s, axis=1))
 #
 # conf_matrix = confusion_matrix(y_test, y_preds)
 # df_cm = pd.DataFrame(conf_matrix, index=GENRES_LIST,columns=GENRES_LIST)
@@ -356,36 +377,36 @@ y_all = mod_data[labels]
 # #####################################################################################################################
 # #####################################################################################################################
 
-############################################################
-# PRINCIPAL COMPONENT ANALYSIS AND PLOTTING
-
-# Keep only MFCC
-cols_keep = ['genre']
-for i in range(12):
-    cols_keep.append('MFCC' + str(i + 1) + ' mean')
-for i in range(12):
-    cols_keep.append('MFCC' + str(i + 1) + ' std')
-
-mod_data = raw_data[cols_keep]
-
-# Split features and labels
-features = list(mod_data.columns[1:])
-labels = mod_data.columns[0]
-
-X_all = raw_data[features]
-y_all = raw_data[labels]
-
-# Perform PCA
-n_components = 2
-pca = PCA(n_components=n_components).fit(X_all)
-pca_plot = pca_results(X_all, pca)
-
-reduced_data = pca.transform(X_all)
-reduced_data = pd.DataFrame(reduced_data, columns = ['Dimension 1', 'Dimension 2'])
-
-# Plot music library
-sns.reset_orig()
-genre_results(reduced_data,y_all,GENRES_LIST)
+# ############################################################
+# # PRINCIPAL COMPONENT ANALYSIS AND PLOTTING
+#
+# # Keep only MFCC
+# cols_keep = ['genre']
+# for i in range(12):
+#     cols_keep.append('MFCC' + str(i + 1) + ' mean')
+# for i in range(12):
+#     cols_keep.append('MFCC' + str(i + 1) + ' std')
+#
+# mod_data = raw_data[cols_keep]
+#
+# # Split features and labels
+# features = list(mod_data.columns[1:])
+# labels = mod_data.columns[0]
+#
+# X_all = raw_data[features]
+# y_all = raw_data[labels]
+#
+# # Perform PCA
+# n_components = 2
+# pca = PCA(n_components=n_components).fit(X_all)
+# pca_plot = pca_results(X_all, pca)
+#
+# reduced_data = pca.transform(X_all)
+# reduced_data = pd.DataFrame(reduced_data, columns = ['Dimension 1', 'Dimension 2'])
+#
+# # Plot music library
+# sns.reset_orig()
+# genre_results(reduced_data,y_all,GENRES_LIST)
 
 
 
